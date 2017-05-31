@@ -1,0 +1,185 @@
+<div class="row">
+	<div class="col-md-12">
+		<h1>
+			Books List
+			<div class="text-right">
+				<button class="btn btn-success" data-toggle="modal"
+					data-target="#modal-books">Add</button>
+			</div>
+		</h1>
+
+		<table class="table table-border table-hover" id="table-books">
+			<thead>
+				<th style="width:20px">No</th>
+				<th>ID</th>
+				<th>Title</th>
+				<th>Publish On</th>
+				<th>Publish ID</th>
+				<th>Publisher</th>
+				<th>Writer ID</th>
+				<th>Writer</th>
+			</thead>
+		</table>
+
+	</div>
+</div>
+<style>
+#table-books {
+	cursor: pointer;
+}
+</style>
+<script type="text/javascript">
+$(function(){
+
+	$('#publishon').datepicker({ dateFormat: 'yy-mm-dd' })
+ 	$('#btn-delete').prop('disabled', true);
+	var table= $('#table-books').DataTable({
+		destroy: true,
+		retrieve: true,
+		ajax:"<?php echo $this->url('book', array('action'=>'getDataTable'));?>",
+		aoColumnDefs:[
+     		{aTargets:[1,4,6], visible: false}],
+    		 "scrollX": true
+	});
+
+	$('#table-books').on('dblclick', 'tr', function () {
+		 var data = table.row( this ).data();
+		 $('#book_id').val(data[1]);
+	     $('#title').val(data[2]);
+	     $('#publishon').val(data[3]);
+	     $('#publisher_id option[value="'+data[4]+'"]').prop('selected','selected');
+	     $('#writer_id option[value="'+data[6]+'"]').prop('selected','selected');
+	     $('#btn-delete').prop('disabled', false);
+	     $('#modal-books').modal('show');
+	});
+ 
+
+	$('#modal-books').on('hidden.bs.modal', function () {
+		reset();
+	});
+		
+		
+	function reset(){
+		table.ajax.reload();
+		$('#btn-delete').prop('disabled', true);
+		$("#book_id").val('');
+		$("#title").val('');			 
+		$("#publishon").val('');
+		$("#publisher_id").val('');
+		$("#writer_id").val('');
+		$('#modal-books').modal('hide');	
+	}
+
+	$('#btn-delete').click(function(){
+		 $.ajax({
+				type: "POST",
+				url: "<?php echo $this->url('book', array('action'=>'delete')); ?>",
+				data: {
+						book_id : $('#book_id').val(),
+				},
+				success: function(response){
+					console.log(response.message);
+					if(response.message==="success"){
+			  	    	swal(response.message, "", "success");
+			  	    	 
+				     }else{
+				  	    swal(response.message, "", "error");
+				     }
+		 	    		 
+					reset();
+				
+				}
+		});
+	});
+
+	
+	$('#btn-save').click(function(){
+		if($('#book_id').val()===''){
+			var url = "<?php echo $this->url('book', array('action'=>'add')); ?>";
+		}else{
+			var url = "<?php echo $this->url('book', array('action'=>'update')); ?>";
+		}
+		
+			 
+		 $.ajax({
+			type: "POST",
+			url: url,
+			data: {
+					book_id : $('#book_id').val(),
+					title : $('#title').val(),
+					publishon : $('#publishon').val(),
+					publisher_id : $('#publisher_id').val(),
+					writer_id : $('#writer_id').val()
+			},
+			success: function(response){
+				console.log(response.message);
+				if(response.message==="success"){
+		  	    	swal(response.message, "", "success");
+		  	    	
+			     }else{
+			  	    swal(response.message, "", "error");
+			     }
+				reset();
+	 	    	
+			
+				}
+		 	});			
+		});
+});
+</script>
+<!-- Modal -->
+<div id="modal-books" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Form Books</h4>
+			</div>
+			<div class="modal-body">
+				<!--         <p>Some text in the modal.</p> -->
+				<div class="form-group">
+					<input type="hidden" id="book_id"> <label>Title</label> <input
+						type="text" class="form-control" id="title">
+				</div>
+				<div class="form-group">
+					<label>Publish On</label> <input type="text" class="form-control"
+						id="publishon">
+				</div>
+
+				<div class="form-group">
+					<label>Publisher</label> <select class="form-control"
+						id="publisher_id" onchange="">
+						<option>Pilih</option>
+				 <?php foreach ($publishers as $row ): ?>
+				 	<option value="<?php echo $row->getPublisherId()?>"><?php echo $row->getName()?></option>
+				 <?php endforeach;?>
+				 </select>
+				</div>
+
+				<div class="form-group">
+					<label>Writer</label> <select class="form-control" id="writer_id"
+						onchange="">
+						<option>Pilih</option>
+				 <?php foreach ($writers as $row ): ?>
+				 	<option value="<?php echo $row->getWriterId()?>"><?php echo $row->getName()?></option>
+				 <?php endforeach;?>
+				 </select>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+
+				<button type="button" class="btn btn-success" id="btn-save">Save</button>
+				<button type="button" class="btn btn-danger" id="btn-delete">Delete</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+
+

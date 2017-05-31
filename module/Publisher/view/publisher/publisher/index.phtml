@@ -1,0 +1,156 @@
+ <div class="row">
+	<div class="col-md-12">
+		<h1>
+			Publishers List
+			<div class="text-right">
+				<button class="btn btn-success" data-toggle="modal"
+					data-target="#modal-publishers">Add</button>
+			</div>
+		</h1>
+
+		<table class="table table-border table-hover" id="table-publishers">
+			<thead>
+				<th style="width:20px">No</th>
+				<th>ID</th>
+				<th>Name</th>
+				 
+			</thead>
+		</table>
+
+	</div>
+</div>
+
+<style>
+#table-publishers {
+	cursor: pointer;
+}
+</style>
+
+<script type="text/javascript">
+$(function(){
+
+	$('#btn-delete').prop('disabled', true);
+	var table= $('#table-publishers').DataTable({
+		destroy: true,
+		retrieve: true,
+		ajax:"<?php echo $this->url('publisher', array('action'=>'getDataTable'));?>",
+		aoColumnDefs:[
+     		{aTargets:[1], visible: false}],
+    		 "scrollX": true
+	});
+
+	$('#table-publishers').on('dblclick', 'tr', function () {
+		 var data = table.row( this ).data();
+		 $('#publisher_id').val(data[1]);
+	     $('#name').val(data[2]);
+	    
+	     $('#btn-delete').prop('disabled', false);
+	     $('#modal-publishers').modal('show');
+	});
+
+
+	$('#modal-publishers').on('hidden.bs.modal', function () {
+		reset();
+	});
+
+
+	$('#btn-delete').click(function(){
+		 $.ajax({
+				type: "POST",
+				url: "<?php echo $this->url('publisher', array('action'=>'delete')); ?>",
+				data: {
+					publisher_id : $('#publisher_id').val(),
+				},
+				success: function(response){
+					console.log(response.message);
+					if(response.message==="success"){
+			  	    	swal(response.message, "", "success");
+			  	    	 
+				     }else{
+				  	    swal(response.message, "", "error");
+				     }
+		 	    		 
+					reset();
+				
+				}
+		});
+	});
+ 
+
+	$('#btn-save').click(function(){
+		if($('#publisher_id').val()===''){
+			var url = "<?php echo $this->url('publisher', array('action'=>'add')); ?>";
+		}else{
+			var url = "<?php echo $this->url('publisher', array('action'=>'update')); ?>";
+		}
+		
+			 
+		 $.ajax({
+			type: "POST",
+			url: url,
+			data: {
+					publisher_id : $('#publisher_id').val(),
+					name : $('#name').val(),
+		 
+			},
+			success: function(response){
+				console.log(response.message);
+				if(response.message==="success"){
+		  	    	swal(response.message, "", "success");
+		  	    	
+			     }else{
+			  	    swal(response.message, "", "error");
+			     }
+				reset();
+	 	    	
+			
+				}
+		 	});			
+	});
+
+	
+	function reset(){
+		table.ajax.reload();
+		$('#btn-delete').prop('disabled', true);
+		$("#publisher_id").val('');
+		$("#name").val('');			 
+		 
+		$('#modal-publishers').modal('hide');	
+	}
+	
+
+});
+</script>
+ 
+ 
+ <!-- Modal -->
+<div id="modal-publishers" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Form Publisher</h4>
+			</div>
+			<div class="modal-body">
+				<!--         <p>Some text in the modal.</p> -->
+				<div class="form-group">
+					<input type="hidden" id="publisher_id"> <label>Name</label> <input
+						type="text" class="form-control" id="name">
+				</div>
+				 
+
+			</div>
+			<div class="modal-footer">
+
+				<button type="button" class="btn btn-success" id="btn-save">Save</button>
+				<button type="button" class="btn btn-danger" id="btn-delete">Delete</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+ 
