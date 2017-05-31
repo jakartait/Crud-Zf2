@@ -84,7 +84,11 @@ class Writers
 		$this->updateDate = $updateDate;
 	}
 
-
+	public function exchangeArray($data)
+	{
+		$this->writerId= (isset($data['writer_id'])) ? $data['writer_id']:null;
+		$this->name= (isset($data['name'])) ? $data['name'] :null;
+	}
 
 }
 

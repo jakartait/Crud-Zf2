@@ -1,3 +1,156 @@
-<strong>Module:</strong>        Writer &raquo;
-<strong>Controller:</strong>    Writer &raquo;
-<strong>Action:</strong>        index
+ <div class="row">
+	<div class="col-md-12">
+		<h1>
+			Writers List
+			<div class="text-right">
+				<button class="btn btn-success" data-toggle="modal"
+					data-target="#modal-writers">Add</button>
+			</div>
+		</h1>
+
+		<table class="table table-border table-hover" id="table-writers">
+			<thead>
+				<th style="width:20px">No</th>
+				<th>ID</th>
+				<th>Name</th>
+				 
+			</thead>
+		</table>
+
+	</div>
+</div>
+
+<style>
+#table-writers {
+	cursor: pointer;
+}
+</style>
+
+<script type="text/javascript">
+$(function(){
+
+	$('#btn-delete').prop('disabled', true);
+	var table= $('#table-writers').DataTable({
+		destroy: true,
+		retrieve: true,
+		ajax:"<?php echo $this->url('writer', array('action'=>'getDataTable'));?>",
+		aoColumnDefs:[
+     		{aTargets:[1], visible: false}],
+    		 "scrollX": true
+	});
+
+	$('#table-writers').on('dblclick', 'tr', function () {
+		 var data = table.row( this ).data();
+		 $('#writer_id').val(data[1]);
+	     $('#name').val(data[2]);
+	    
+	     $('#btn-delete').prop('disabled', false);
+	     $('#modal-writers').modal('show');
+	});
+
+
+	$('#modal-writers').on('hidden.bs.modal', function () {
+		reset();
+	});
+
+
+	$('#btn-delete').click(function(){
+		 $.ajax({
+				type: "POST",
+				url: "<?php echo $this->url('writer', array('action'=>'delete')); ?>",
+				data: {
+					writer_id : $('#writer_id').val(),
+				},
+				success: function(response){
+					console.log(response.message);
+					if(response.message==="success"){
+			  	    	swal(response.message, "", "success");
+			  	    	 
+				     }else{
+				  	    swal(response.message, "", "error");
+				     }
+		 	    		 
+					reset();
+				
+				}
+		});
+	});
+ 
+
+	$('#btn-save').click(function(){
+		if($('#writer_id').val()===''){
+			var url = "<?php echo $this->url('writer', array('action'=>'add')); ?>";
+		}else{
+			var url = "<?php echo $this->url('writer', array('action'=>'update')); ?>";
+		}
+		
+			 
+		 $.ajax({
+			type: "POST",
+			url: url,
+			data: {
+					writer_id : $('#writer_id').val(),
+					name : $('#name').val(),
+		 
+			},
+			success: function(response){
+				console.log(response.message);
+				if(response.message==="success"){
+		  	    	swal(response.message, "", "success");
+		  	    	
+			     }else{
+			  	    swal(response.message, "", "error");
+			     }
+				reset();
+	 	    	
+			
+				}
+		 	});			
+	});
+
+	
+	function reset(){
+		table.ajax.reload();
+		$('#btn-delete').prop('disabled', true);
+		$("#writer_id").val('');
+		$("#name").val('');			 
+		 
+		$('#modal-writers').modal('hide');	
+	}
+	
+
+});
+</script>
+ 
+ 
+ <!-- Modal -->
+<div id="modal-writers" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Form Publisher</h4>
+			</div>
+			<div class="modal-body">
+				<!--         <p>Some text in the modal.</p> -->
+				<div class="form-group">
+					<input type="hidden" id="writer_id"> <label>Name</label> <input
+						type="text" class="form-control" id="name">
+				</div>
+				 
+
+			</div>
+			<div class="modal-footer">
+
+				<button type="button" class="btn btn-success" id="btn-save">Save</button>
+				<button type="button" class="btn btn-danger" id="btn-delete">Delete</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+ 

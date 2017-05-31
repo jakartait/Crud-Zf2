@@ -243,4 +243,15 @@ class Writers extends \Application\Entity\Writers implements \Doctrine\ORM\Proxy
         return parent::setUpdateDate($updateDate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function exchangeArray($data)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'exchangeArray', array($data));
+
+        return parent::exchangeArray($data);
+    }
+
 }
